@@ -6,31 +6,33 @@ from kl_junctek import calculate_checksum, parse_response, parse_r00_response, p
 
 # Создаем парсер аргументов командной строки
 parser = argparse.ArgumentParser(description="Serial Client for JUNCTEK KL-F device")
-parser.add_argument("com_port", type=str, help="COM port name")
-parser.add_argument("baud_rate", type=int, default=115200, help="Baud rate")
-parser.add_argument("communication_address", type=int, default=1, help="Communication address")
-parser.add_argument("commands", nargs="+", choices=["info", "measured", "configured"], help="Commands to run")
+parser.add_argument("-p", "--port", type=str, help="COM port name")
+parser.add_argument("-b", "--baudrate", type=int, default=115200, help="Baud rate")
+parser.add_argument("-a", "--address", type=int, default=1, help="Communication address")
+parser.add_argument("-c", "--command", type=str, help="Commands to run")
 
-# Получаем аргументы из командной строки
 args = parser.parse_args()
+
+if args.command:
+    commands = filter(None, args.command.split(','))
 
 
 class DeviceClient:
-    def __init__(self, com_port, baud_rate):
-        self.com_port = com_port
-        self.baud_rate = baud_rate
+    def __init__(self, port, baudrate):
+        self.port = port
+        self.baudrate = baudrate
         try:
-            self.serial_port = serial.Serial(com_port, baud_rate, timeout=2)
+            self.serial_port = serial.Serial(port, baudrate, timeout=2)
         except serial.serialutil.SerialException as e:
             error_message = str(e).split(":")[0].strip()
             print(f"Ошибка при открытии COM-порта: {error_message}")
             sys.exit(1)
 
-    def send_command(self, function_number, communication_address, data_field):
+    def send_command(self, function_number, address, data_field):
         try:
             calculated_checksum = calculate_checksum([data_field])
 
-            command = f":R{function_number:02d}={communication_address},{calculated_checksum},{data_field},\r\n"
+            command = f":R{function_number:02d}={address},{calculated_checksum},{data_field},\r\n"
             self.serial_port.write(command.encode())
             response = self.serial_port.read(1024).decode()
             parsed_response = {}
@@ -59,8 +61,8 @@ class DeviceClient:
 
 
 def main():
-    device_client = DeviceClient(args.com_port, args.baud_rate)
-    communication_address = args.communication_address
+    device_client = DeviceClient(args.port, args.baudrate)
+    address = args.address
     command_results = {}
 
     command_function_mapping = {
@@ -69,10 +71,10 @@ def main():
         "configured": 51
     }
 
-    for command in args.commands:
+    for command in commands:
         function_number = command_function_mapping.get(command)
         if function_number is not None:
-            response = device_client.send_command(function_number, communication_address, 1)
+            response = device_client.send_command(function_number, address, 1)
             if response:
                 command_results[command] = response
         else:

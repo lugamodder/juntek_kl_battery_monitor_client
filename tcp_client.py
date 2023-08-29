@@ -6,17 +6,19 @@ from kl_junctek import calculate_checksum, parse_response, parse_r00_response, p
 
 # Создаем парсер аргументов командной строки
 parser = argparse.ArgumentParser(description="TCP Client for JUNCTEK KL-F device")
-parser.add_argument("server_host", type=str, help="Server host IP")
-parser.add_argument("server_port", type=int, help="Server port number")
-parser.add_argument("communication_address", type=int, help="Communication address")
-parser.add_argument("commands", nargs="+", choices=["info", "measured", "configured"], help="Commands to run")
+parser.add_argument("-s", "--server", type=str, help="Server host IP")
+parser.add_argument("-p", "--port", type=int, help="Server port number")
+parser.add_argument("-a", "--address", type=int, default=1, help="Communication address")
+parser.add_argument("-c", "--command", type=str,  help="Commands to run")
 
-# Получаем аргументы из командной строки
 args = parser.parse_args()
 
-# Используем аргументы для установки соединения
-server_host = args.server_host
-server_port = args.server_port
+if args.command:
+    commands = filter(None, args.command.split(','))
+
+server_host = args.server
+server_port = args.port
+comm_addr = args.address
 
 
 class DeviceClient:
@@ -36,11 +38,11 @@ class DeviceClient:
             print("Превышено время ожидания при установке соединения.")
             sys.exit(1)
 
-    def send_command(self, function_number, communication_address, data_field):
+    def send_command(self, function_number, comm_addr, data_field):
         try:
             calculated_checksum = calculate_checksum([data_field])
 
-            command = f":R{function_number:02d}={communication_address},{calculated_checksum},{data_field},\r\n"
+            command = f":R{function_number:02d}={comm_addr},{calculated_checksum},{data_field},\r\n"
             self.client_socket.sendall(command.encode())
             response = self.client_socket.recv(1024).decode()
             parsed_response = {}
@@ -72,7 +74,6 @@ class DeviceClient:
 def main():
     device_client = DeviceClient(server_host, server_port)
     device_client.connect()
-    communication_address = args.communication_address
     command_results = {}
 
     command_function_mapping = {
@@ -81,10 +82,10 @@ def main():
         "configured": 51
     }
 
-    for command in args.commands:
+    for command in commands:
         function_number = command_function_mapping.get(command)
         if function_number is not None:
-            response = device_client.send_command(function_number, communication_address, 1)
+            response = device_client.send_command(function_number, comm_addr, 1)
             if response:
                 command_results[command] = response
         else:

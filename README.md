@@ -17,17 +17,17 @@
 
 Клиент запускается со следующим параметрами:
 
- `serial_client.py com_port baud_rate communication_address {info,measured,configured}`
+ `serial_client.py -p <com_port> -b <baudrate> -a <address> -c info,measured,configured`
  
 где:
  *  *com_port* - пусть к com-порту;
- *  *baud_rate*  -скорость com-порта, обычно 115200;
- *  *communication_address* - собственный адрес устройства, обычно 1;
- *  *info measured configured* - набор функций, по которым запрашивать данные, соответствуют R00, R50, R51 из документации. можно использовать или все, или частично. От этого будет зависеть что возвращает устройство.
+ *  *baudrate*  -скорость com-порта, обычно 115200;
+ *  *address* - собственный адрес устройства, обычно 1;
+ *  *info,measured,configured* - набор функций, по которым запрашивать данные, соответствуют R00, R50, R51 из документации. можно использовать или все, или частично. От этого будет зависеть что возвращает устройство.
 
 Пример использования:
 ```python
-python3 serial_client.py COM4 115200 1 info configured
+python3 serial_client.py -p COM4 -b 115200 -a 1 -c info,configured
 ```
 ---
 
@@ -35,18 +35,18 @@ python3 serial_client.py COM4 115200 1 info configured
 **[tcp_client.py](https://github.com/lugamodder/juntek_kl_battery_monitor_client/blob/master/tcp_client.py "tcp_client.py")** предназначен для работы через TCP/IP - UART конвертер, например Elfin-EE11A. Подключение к батарейному монитору аналогичное, по RS485.
 TCP-клиент запускается со следующим параметрами:
 
- `tcp_client.py IP Port communication_address {info,measured,configured}`
+ `tcp_client.py -s <server_ip> -p <server_port> -a <address> -c info,measured,configured`
  
 где:
 
- *  *IP* - IP TCP/IP - UART конвертера;
- *  *Port*  - номер TCP-порт TCP/IP - UART конвертера;
- *  *communication_address* - собственный адрес устройства, обычно 1;
- *  *info measured configured* - набор функций, по которым запрашивать данные, соответствуют R00, R50, R51 из документации. можно использовать или все, или частично. От этого будет зависеть что возвращает устройство.
+ *  *server_ip* - IP TCP/IP - UART конвертера;
+ *  *server_port*  - номер TCP-порт TCP/IP - UART конвертера;
+ *  *address* - собственный адрес устройства, обычно 1;
+ *  *info,measured,configured* - набор функций, по которым запрашивать данные, соответствуют R00, R50, R51 из документации. можно использовать или все, или частично. От этого будет зависеть что возвращает устройство.
  
 Пример использования:
 ```python
-python3 tcp_client.py 192.168.2.22 9999 1 measured info configured
+python3 tcp_client.py -s 192.168.2.22 -p 9999 -a 1 -c measured,info,configured
 ```
 Пример вывода JSON:
 ```json
