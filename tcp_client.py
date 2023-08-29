@@ -27,10 +27,13 @@ class DeviceClient:
 
     def connect(self):
         try:
-            self.client_socket.connect((self.server_host, self.server_port))
             self.client_socket.settimeout(3)
+            self.client_socket.connect((self.server_host, self.server_port))
         except TimeoutError:
             print("Не удалось установить соединение с сервером. Проверьте параметры и доступность сервера.")
+            sys.exit(1)
+        except socket.timeout:
+            print("Превышено время ожидания при установке соединения.")
             sys.exit(1)
 
     def send_command(self, function_number, communication_address, data_field):
