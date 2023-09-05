@@ -14,6 +14,7 @@
  | 2      | RS485 +    |
  | 3      | GND        |
  | 4      | NC         |
+ 
 
 Клиент запускается со следующим параметрами:
 
@@ -32,7 +33,9 @@ python3 serial_client.py -p COM4 -b 115200 -a 1 -c info,configured
 ---
 
 
-**[tcp_client.py](https://github.com/lugamodder/juntek_kl_battery_monitor_client/blob/master/tcp_client.py "tcp_client.py")** предназначен для работы через TCP/IP - UART конвертер, например Elfin-EE11A. Подключение к батарейному монитору аналогичное, по RS485.
+**[tcp_client.py](https://github.com/lugamodder/juntek_kl_battery_monitor_client/blob/master/tcp_client.py "tcp_client.py")** предназначен для работы через TCP/IP - UART конвертер, например Elfin-EE11A. Подключение к батарейному монитору аналогичное, по RS485. Схема подключения к на примере Elfin-EE11A:
+<img src='./Juntek KL-Elfin-EE11.jpg.jpg' width=60%>
+
 TCP-клиент запускается со следующим параметрами:
 
  `tcp_client.py -s <server_ip> -p <server_port> -a <address> -c info,measured,configured`
