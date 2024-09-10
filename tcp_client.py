@@ -41,9 +41,13 @@ class DeviceClient:
 
     def send_command(self, function_number, comm_addr, data_field):
         try:
-            calculated_checksum = calculate_checksum([data_field])
-
-            command = f":R{function_number:02d}={comm_addr},{calculated_checksum},{data_field},\r\n"
+            if function_number == 60:
+               data_field = 100
+               calculated_checksum = calculate_checksum([data_field])
+               command = f":W{function_number:02d}={comm_addr},{calculated_checksum},{data_field},\r\n"
+            else:
+               calculated_checksum = calculate_checksum([data_field])
+               command = f":R{function_number:02d}={comm_addr},{calculated_checksum},{data_field},\r\n"
             self.client_socket.sendall(command.encode())
             response = self.client_socket.recv(1024).decode()
             parsed_response = {}
@@ -54,6 +58,8 @@ class DeviceClient:
                 parsed_response = parse_response(response, parse_r50_response)
             elif function_number == 51:
                 parsed_response = parse_response(response, parse_r51_response)
+            elif function_number == 60:
+                parsed_response = ""
             else:
                 print("Неизвестная команда")
 
@@ -80,7 +86,8 @@ def main():
     command_function_mapping = {
         "info": 00,
         "measured": 50,
-        "configured": 51
+        "configured": 51,
+        "full_battery": 60
     }
 
     for command in commands:
